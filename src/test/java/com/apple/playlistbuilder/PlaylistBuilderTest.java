@@ -12,9 +12,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-/**
- * Created by cpereira on 09/07/17.
- */
 public class PlaylistBuilderTest {
 
     PlaylistBuilder playlistBuilder;
