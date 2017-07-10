@@ -1,4 +1,4 @@
-package com.apple.playlistbuilder;
+package com.apple.playlistbuilder.exceptions;
 
 /**
  * Exception throw when the song line does not respect the expected format.

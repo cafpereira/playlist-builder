@@ -4,16 +4,25 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Created by cpereira on 09/07/17.
+ * Testing duration utility class.
  */
 public class DurationHelperTest {
 
     @Test
     public void covertZeroSeconds(){
         long seconds = 0;
-        String expected = "0:0";
+        String expected = "00:00";
         String actual = DurationHelper.convertDurationFormat(seconds);
 
-        Assert.assertEquals("Convert Zero seconds: ", actual, expected);
+        Assert.assertEquals(actual, expected, "ERROR Convert Zero Seconds: ");
+    }
+
+    @Test
+    public void covertLessThanMinute(){
+        long seconds = 30;
+        String expected = "00:30";
+        String actual = DurationHelper.convertDurationFormat(seconds);
+
+        Assert.assertEquals(actual, expected, "ERROR Convert 30 Seconds: ");
     }
 }
