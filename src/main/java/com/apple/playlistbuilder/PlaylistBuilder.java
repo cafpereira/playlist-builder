@@ -1,7 +1,5 @@
 package com.apple.playlistbuilder;
 
-import com.apple.playlistbuilder.exceptions.OutOfBoundDurationException;
-
 import java.io.*;
 import java.util.*;
 
@@ -49,10 +47,9 @@ public class PlaylistBuilder {
     private BufferedReader bufferedReader;
 
     private  final int DEFAULT_INITIAL_CAPACITY = 10;
-    private PriorityQueue<Song> minHeap = new PriorityQueue<Song>();
+    private PriorityQueue<Song> minHeap = new PriorityQueue<>();
     private PriorityQueue<Song> maxHeap =
             new PriorityQueue<Song>(DEFAULT_INITIAL_CAPACITY, Collections.reverseOrder());
-    private List<String> playlist;
 
 
     public PlaylistBuilder(final String inputFilePath) throws FileNotFoundException {
@@ -66,36 +63,29 @@ public class PlaylistBuilder {
 
     public static void main(String[] args) throws Exception {
         String fileName = "Albums.txt";
-        String outputFilename = "Playlist.txt";
-
         PlaylistBuilder builder = new PlaylistBuilder(fileName);
-        builder.generatePlaylist();
-        builder.writePlaylistFile(outputFilename);
+        Playlist playlist = builder.generatePlaylist();
+
+        String outputFilename = "Playlist.txt";
+        builder.writePlaylistFile(playlist, outputFilename);
     }
 
-    public List<String> generatePlaylist() throws IOException, OutOfBoundDurationException {
+    public Playlist generatePlaylist() throws Exception {
 
-        fetchFileToHeap(bufferedReader);
-        double median = calculateMedian();
-        long totalSeconds = 0;
+        loadAlbumsFromFile(bufferedReader);
+        double median = calculateMedian(maxHeap, minHeap);
 
-        Song song;
-        playlist = new ArrayList<>();
+        Playlist playlist = new Playlist();
+
         while (!maxHeap.isEmpty()){
-            song = maxHeap.remove();
-            playlist.add(song.parseToOutputFormat());
-            totalSeconds += song.getDurationInSeconds();
+            playlist.addSong(maxHeap.remove());
         }
         // Reverse to list songs in order from shortest to longest.
-        Collections.reverse(playlist);
+        Collections.reverse(playlist.getSongs());
 
         while (!minHeap.isEmpty() && minHeap.peek().getDurationInSeconds() <= median) {
-            song = minHeap.remove();
-            playlist.add(song.parseToOutputFormat());
-            totalSeconds += song.getDurationInSeconds();
+            playlist.addSong(minHeap.remove());
         }
-
-        playlist.add("Total Time: " + DurationHelper.convertDurationFormat(totalSeconds));
         return playlist;
     }
 
@@ -103,14 +93,13 @@ public class PlaylistBuilder {
     /**
      * Transfer from heap to playlist file
      */
-    public void writePlaylistFile(final String outputFilePath){
+    public void writePlaylistFile(Playlist playlist, final String outputFilePath) {
         try {
             PrintWriter writer = new PrintWriter(outputFilePath, "UTF-8");
-            for (int i = 0; i<playlist.size(); i++) {
-                writer.print(playlist.get(i));
+            for (Song song : playlist.getSongs()) {
+                writer.println(song.parseToOutputFormat());
             }
-            writer.println("The first line");
-            writer.println("The second line");
+            writer.println(playlist.parseDurationToOutputFormat());
             writer.close();
         } catch (IOException eio) {
             eio.printStackTrace();
@@ -120,47 +109,52 @@ public class PlaylistBuilder {
 
     /**
      * Returns Median duration in seconds
+     * @param lowerHalf
+     * @param upperHalf
      */
-    private double calculateMedian(){
-        if ((minHeap.size() == 0) && (maxHeap.size() == 0)) {
+    private double calculateMedian(PriorityQueue<Song> lowerHalf, PriorityQueue<Song> upperHalf){
+        if ((lowerHalf.size() == 0) && (upperHalf.size() == 0)) {
             return -1;
-        } else if (minHeap.size() == 0) {
-            return maxHeap.peek().getDurationInSeconds();
-        } else if (maxHeap.size() == 0) {
-            return minHeap.peek().getDurationInSeconds();
+        } else if (upperHalf.size() == 0) {
+            return lowerHalf.peek().getDurationInSeconds();
+        } else if (lowerHalf.size() == 0) {
+            return upperHalf.peek().getDurationInSeconds();
         } else {
-            return minHeap.size() == maxHeap.size()
-                    ? 0.5 * (minHeap.peek().getDurationInSeconds() + maxHeap.peek().getDurationInSeconds())
-                    : minHeap.peek().getDurationInSeconds();
+            return upperHalf.size() == lowerHalf.size()
+                    ? 0.5 * (upperHalf.peek().getDurationInSeconds() + lowerHalf.peek().getDurationInSeconds())
+                    : upperHalf.peek().getDurationInSeconds();
         }
     }
 
-    private void fetchFileToHeap(final BufferedReader bufferedReader) throws IOException {
-
-        //Read the text file to add bad words to an array
-        // Save each music of the file in the heap
+    /**
+     * Read the text file to add bad words to an array.
+     * Save each music of the file in the heap
+     * @param inputReader
+     * @throws IOException
+     */
+    private void loadAlbumsFromFile(final BufferedReader inputReader) throws Exception {
         String line;
-        boolean isToStartNewAlbum = true;
-        Album album = null;
-        Song song;
+        boolean startNewAlbum = true;
+        Album newAlbum = null;
 
-        while ((line = bufferedReader.readLine()) != null) {
-            if (isToStartNewAlbum) {
-                album = generateAlbum(line);
-                isToStartNewAlbum = false;
+        while ((line = inputReader.readLine()) != null) {
+            if (startNewAlbum) {
+                newAlbum = Album.parseFrom(line);
+                startNewAlbum = false;
             } else if (line.trim().isEmpty()) {
-                isToStartNewAlbum = true;
+                startNewAlbum = true;
             } else {
-                song = generateSong(album, line);
+                Song nextSong = Song.parseFrom(line);
+                nextSong.setAlbum(newAlbum);
 
                 // Saves using Heap
                 if (minHeap.isEmpty()) {
-                    minHeap.add(song);
+                    minHeap.add(nextSong);
                 } else {
-                    if (song.compareTo(minHeap.peek()) >= 0) {
-                        minHeap.add(song);
+                    if (nextSong.compareTo(minHeap.peek()) >= 0) {
+                        minHeap.add(nextSong);
                     } else {
-                        maxHeap.add(song);
+                        maxHeap.add(nextSong);
                     }
                 }
                 // balance minHeap and maxHeap
@@ -170,47 +164,6 @@ public class PlaylistBuilder {
                     minHeap.add(maxHeap.remove());
                 }
             }
-
         }
-
-    }
-
-    /**
-     * Converts line "XTC / Drums and Wires / 1979" to an Album
-     */
-    private static Album generateAlbum(final String line) {
-
-        String[] info = line.split("/");
-        if (info.length != 3) {
-            throw new RuntimeException("Wrong album information: " + line);
-        }
-
-        Album album = new Album();
-        album.setArtistName(info[0].trim());
-        album.setName(info[1].trim());
-        album.setYear(Integer.valueOf(info[2].trim()));
-        return album;
-    }
-
-    /**
-     * Converts line "Making Plans for Nigel - 4:14" to an Song
-     */
-    private Song generateSong(final Album album, final String line) {
-
-        String[] info = line.split("-");
-        if (info.length != 2) {
-            throw new RuntimeException("Wrong song information");
-        }
-
-        String[] time = info[1].trim().split(":");
-        if (info.length != 2) {
-            throw new RuntimeException("Wrong song duration");
-        }
-
-        Song song = new Song();
-        song.setAlbum(album);
-        song.setName(info[0].trim());
-        song.setDuration(Long.valueOf(time[0]), Long.valueOf(time[1]));
-        return song;
     }
 }
