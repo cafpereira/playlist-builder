@@ -1,5 +1,7 @@
 package com.apple.playlistbuilder;
 
+import com.apple.playlistbuilder.exceptions.OutOfBoundDurationException;
+
 /**
  * Created by cpereira on 09/07/17.
  */
@@ -39,7 +41,7 @@ public class Song  implements Comparable<Song>{
     /**
      * Convert to output format: Artist - Album - Year - Song - Song Length
      */
-    public String parseToOutputFormat(){
+    public String parseToOutputFormat() throws OutOfBoundDurationException {
 
         return  this.album.getArtistName() + " - " + this.album.getName() + " - " + this.album.getYear() + " - " +
                 name + " - " + DurationHelper.convertDurationFormat(this.durationInSeconds);

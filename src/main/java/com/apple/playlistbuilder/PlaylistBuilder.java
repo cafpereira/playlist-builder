@@ -1,9 +1,9 @@
 package com.apple.playlistbuilder;
 
+import com.apple.playlistbuilder.exceptions.OutOfBoundDurationException;
+
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 // I have decided to make a playlist featuring short songs from three albums from three different decades.
 // Given a list of albums and their corresponding songs, output a list of songs in order from shortest to longest,
@@ -45,51 +45,67 @@ import java.util.PriorityQueue;
 //
 //
 public class PlaylistBuilder {
-    private static PriorityQueue<Song> minHeap = new PriorityQueue<Song>();
-    private static PriorityQueue<Song> maxHeap = new PriorityQueue<Song>();
-    private static List<String> playlist;
-    BufferedReader bufferedReader;
+
+    private BufferedReader bufferedReader;
+
+    private  final int DEFAULT_INITIAL_CAPACITY = 10;
+    private PriorityQueue<Song> minHeap = new PriorityQueue<Song>();
+    private PriorityQueue<Song> maxHeap =
+            new PriorityQueue<Song>(DEFAULT_INITIAL_CAPACITY, Collections.reverseOrder());
+    private List<String> playlist;
+
+
+    public PlaylistBuilder(final String inputFilePath) throws FileNotFoundException {
+        this(new BufferedReader(new FileReader(inputFilePath)));
+    }
+
+    public PlaylistBuilder(final BufferedReader bufferedReader) {
+        this.bufferedReader = bufferedReader;
+    }
 
 
     public static void main(String[] args) throws Exception {
         String fileName = "Albums.txt";
         String outputFilename = "Playlist.txt";
 
-        BufferedReader bufferedReader = getReader(fileName);
-        generatePlaylist(bufferedReader);
-        writePlaylistFile(outputFilename, playlist);
+        PlaylistBuilder builder = new PlaylistBuilder(fileName);
+        builder.generatePlaylist();
+        builder.writePlaylistFile(outputFilename);
     }
 
-    public static void generatePlaylist(final BufferedReader bufferedReader) throws IOException {
+    public List<String> generatePlaylist() throws IOException, OutOfBoundDurationException {
 
         fetchFileToHeap(bufferedReader);
         double median = calculateMedian();
         long totalSeconds = 0;
 
         Song song;
-        playlist = new ArrayList<>(maxHeap.size());
-        for (int i = maxHeap.size()-1; i>=0; i--) {
+        playlist = new ArrayList<>();
+        while (!maxHeap.isEmpty()){
             song = maxHeap.remove();
-            playlist.set(i, song.parseToOutputFormat());
+            playlist.add(song.parseToOutputFormat());
             totalSeconds += song.getDurationInSeconds();
         }
+        // Reverse to list songs in order from shortest to longest.
+        Collections.reverse(playlist);
 
-        while (minHeap.peek().getDurationInSeconds() <= median) {
+        while (!minHeap.isEmpty() && minHeap.peek().getDurationInSeconds() <= median) {
             song = minHeap.remove();
             playlist.add(song.parseToOutputFormat());
             totalSeconds += song.getDurationInSeconds();
         }
 
         playlist.add("Total Time: " + DurationHelper.convertDurationFormat(totalSeconds));
+        return playlist;
     }
 
 
     /**
      * Transfer from heap to playlist file
      */
-    public static void writePlaylistFile(final String outputFilename, final List<String> playlist){
+    public void writePlaylistFile(final String outputFilePath){
         try {
-            PrintWriter writer = new PrintWriter(outputFilename, "UTF-8");
+            PrintWriter writer = new PrintWriter(outputFilePath, "UTF-8");
             for (int i = 0; i<playlist.size(); i++) {
                 writer.print(playlist.get(i));
             }
@@ -105,19 +121,21 @@ public class PlaylistBuilder {
     /**
      * Returns Median duration in seconds
      */
-    public static double calculateMedian(){
-        return minHeap.size() == maxHeap.size()
-                ? 0.5 * (minHeap.peek().getDurationInSeconds() + maxHeap.peek().getDurationInSeconds())
-                : minHeap.peek().getDurationInSeconds();
+    private double calculateMedian(){
+        if ((minHeap.size() == 0) && (maxHeap.size() == 0)) {
+            return -1;
+        } else if (minHeap.size() == 0) {
+            return maxHeap.peek().getDurationInSeconds();
+        } else if (maxHeap.size() == 0) {
+            return minHeap.peek().getDurationInSeconds();
+        } else {
+            return minHeap.size() == maxHeap.size()
+                    ? 0.5 * (minHeap.peek().getDurationInSeconds() + maxHeap.peek().getDurationInSeconds())
+                    : minHeap.peek().getDurationInSeconds();
+        }
     }
 
-    public static BufferedReader getReader(final String filename) throws FileNotFoundException {
-        FileReader fileReader = new FileReader(filename);
-        return new BufferedReader(fileReader);
-    }
-
-
-    public static void fetchFileToHeap(final BufferedReader bufferedReader) throws IOException {
+    private void fetchFileToHeap(final BufferedReader bufferedReader) throws IOException {
 
         //Read the text file to add bad words to an array
         // Save each music of the file in the heap
@@ -125,6 +143,7 @@ public class PlaylistBuilder {
         boolean isToStartNewAlbum = true;
         Album album = null;
         Song song;
+
         while ((line = bufferedReader.readLine()) != null) {
             if (isToStartNewAlbum) {
                 album = generateAlbum(line);
@@ -161,9 +180,9 @@ public class PlaylistBuilder {
      */
     private static Album generateAlbum(final String line) {
 
-        String[] info = line.split("//");
+        String[] info = line.split("/");
         if (info.length != 3) {
-            throw new RuntimeException("Wrong album information");
+            throw new RuntimeException("Wrong album information: " + line);
         }
 
         Album album = new Album();
@@ -176,14 +195,14 @@ public class PlaylistBuilder {
     /**
      * Converts line "Making Plans for Nigel - 4:14" to an Song
      */
-    private static Song generateSong(final Album album, final String line) {
+    private Song generateSong(final Album album, final String line) {
 
         String[] info = line.split("-");
         if (info.length != 2) {
             throw new RuntimeException("Wrong song information");
         }
 
-        String[] time = info[1].split(":");
+        String[] time = info[1].trim().split(":");
         if (info.length != 2) {
             throw new RuntimeException("Wrong song duration");
         }
