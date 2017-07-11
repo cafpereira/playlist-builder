@@ -6,7 +6,7 @@ import java.text.MessageFormat;
 
 public class Song implements Comparable<Song>{
     // Song output format: [artist] - [album] - [year] - [song] - [duration]
-    private final MessageFormat outputFormat = new MessageFormat("{0} - {0} - {0} - {0} - {0}");
+    private final MessageFormat outputFormat = new MessageFormat("{0} - {1} - {2} - {3} - {4}");
 
     private Album album;
     private String name;
