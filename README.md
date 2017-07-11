@@ -12,7 +12,7 @@ The criteria used to generate your playlist it that all songs duration presented
 in it should be less than or equal to the median song in terms of length.  
 FInally, these songs in your playlist will be presented in order from shortest to longest
 
-## Problem Input
+## Albums Input
 The application expected a source data file in the following format:
 
 <pre><code>
@@ -35,7 +35,7 @@ The application expected a source data file in the following format:
 [Song N] - [Song N length in m:ss]
 </code></pre>
 
-## Problem Input
+## Playlist Output
 
 Once the playlist is generated, you should see the following structure:
 
@@ -49,10 +49,16 @@ Total Time: [mm:ss]
 
 ## How to Use
 
-1. Make sure to have your Album file following the input criteria
+Make sure to have your Album file following the input criteria
 
-2. Step 2
+In order to generate the playlist you should execute the application 
+*playlist-builder* from your terminal. See format bellow:
+> **java -jar playlist-builder.jar -input [inputFilePath] -output [outputFilePath]**
 
-3. Step 3
+Example:<br>
+<code>
+ java -jar playlist-builder.jar -input src/main/resources/Albums.txt -output src/main/resources/Playlist.txt</code>
+
+
 
 
