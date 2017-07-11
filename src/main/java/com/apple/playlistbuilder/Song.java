@@ -3,38 +3,14 @@ package com.apple.playlistbuilder;
 import com.apple.playlistbuilder.exceptions.SongFormatException;
 
 import java.text.MessageFormat;
-import java.util.Objects;
 
 public class Song implements Comparable<Song>{
+    // Song output format: [artist] - [album] - [year] - [song] - [duration]
     private final MessageFormat outputFormat = new MessageFormat("{0} - {0} - {0} - {0} - {0}");
 
     private Album album;
     private String name;
     private long durationInSeconds;
-
-    public Album getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(final Album album) {
-        this.album = album;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public long getDurationInSeconds() {
-        return durationInSeconds;
-    }
-
-    public void setDurationInSeconds(final long durationInSeconds) {
-        this.durationInSeconds = durationInSeconds;
-    }
 
     public void setDuration(final long minutes, final long seconds) {
         this.durationInSeconds = minutes * 60 + seconds;
@@ -42,7 +18,7 @@ public class Song implements Comparable<Song>{
 
 
     /**
-     * Converts line "Making Plans for Nigel - 4:14" to an Song
+     * Converts text line "[song-title] - [duration]" into a Song
      */
     public static Song parseFrom(final String line) throws SongFormatException {
         String[] info = line.split("-");
@@ -75,10 +51,6 @@ public class Song implements Comparable<Song>{
         return (int) (this.durationInSeconds - o.durationInSeconds);
     }
 
-    /**
-     * This instance is equal to all instances of {@code ImmutablePlaylistInterface} that have equal attribute values.
-     * @return {@code true} if {@code this} is equal to {@code another} instance
-     */
     @Override
     public boolean equals(Object another) {
         if (this == another) return true;
@@ -92,10 +64,6 @@ public class Song implements Comparable<Song>{
                 && durationInSeconds == another.getDurationInSeconds();
     }
 
-    /**
-     * Computes a hash code from attributes: {@code songs}, {@code totalDurationSeconds}.
-     * @return hashCode value
-     */
     @Override
     public int hashCode() {
         int h = 5381;
@@ -103,5 +71,29 @@ public class Song implements Comparable<Song>{
         h += (h << 5) + name.hashCode();
         h += (h << 5) + Long.hashCode(durationInSeconds);
         return h;
+    }
+
+    public Album getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(Album album) {
+        this.album = album;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getDurationInSeconds() {
+        return durationInSeconds;
+    }
+
+    public void setDurationInSeconds(long durationInSeconds) {
+        this.durationInSeconds = durationInSeconds;
     }
 }

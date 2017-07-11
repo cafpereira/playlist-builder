@@ -1,47 +1,17 @@
 package com.apple.playlistbuilder;
 
 import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.PriorityQueue;
 
-// I have decided to make a playlist featuring short songs from three albums from three different decades.
-// Given a list of albums and their corresponding songs, output a list of songs in order from shortest to longest,
-// where each song is less than or equal to the median song in terms of length.  Finally, output the total time of
-// the playlist.
-//
-// The source data file (Albums.txt) is in the following format:
-//
-// <Artist> / <Album> / <Year>
-// <Song 1> - <Song 1 length in m:ss>
-// <Song 2> - <Song 2 length in m:ss>
-//        ...
-// <Song N> - <Song N length in m:ss>
-//
-// <Artist> / <Album> / <Year>
-// <Song 1> - <Song 1 length in m:ss>
-// <Song 2> - <Song 2 length in m:ss>
-//        ...
-// <Song N> - <Song N length in m:ss>
-//
-// <Artist> / <Album> / <Year>
-// <Song 1> - <Song 1 length in m:ss>
-// <Song 2> - <Song 2 length in m:ss>
-//        ...
-// <Song N> - <Song N length in m:ss>
-//
-//
-// Your output should be like this:
-//
-// 1. Artist - Album - Year - Song - Song Length
-// 2. Artist - Album - Year - Song - Song Length
-//    ...
-// <N>. Artist - Album - Year - Song - Song Length
-// Total Time: <mm:ss>
-//
-//
-// Use any language you like and make it runnable from the command line.
-// If your runnable is compiled, make sure to provide uncompiled source.
-//
-//
+/**
+ * Class responsible for reading a list of albums from a given input file and
+ * and returning a playlist made of songs that have duration shorter than the
+ * median of all songs.
+ *
+ * This implementation use optimized tree data structures to calculate the
+ * median value of the list without sorting the entire list.
+ */
 public class PlaylistBuilder {
 
     private BufferedReader bufferedReader;
@@ -70,19 +40,32 @@ public class PlaylistBuilder {
         builder.writePlaylistFile(playlist, outputFilename);
     }
 
+    /**
+     * Load all songs from the album list, calculate the median duration
+     * and generate the playlist.
+     *
+     * @return
+     * @throws Exception
+     */
     public Playlist generatePlaylist() throws Exception {
 
+        // Optimized implementation of song loading process that keeps two binary trees:
+        // a) maxHeap with all elements from the lower half of the song list and
+        // b) minHeap with upper half songs.
         loadAlbumsFromFile(bufferedReader);
+
+        // Using both heaps we can compute the median value in constant time O(1)
         double median = calculateMedian(maxHeap, minHeap);
 
+        // Then we iterate over the first lower half and add all songs to the final playlist
         Playlist playlist = new Playlist();
-
         while (!maxHeap.isEmpty()){
             playlist.addSong(maxHeap.remove());
         }
         // Reverse to list songs in order from shortest to longest.
         Collections.reverse(playlist.getSongs());
 
+        // Finally, we look for songs with duplicated duration values on the other tree
         while (!minHeap.isEmpty() && minHeap.peek().getDurationInSeconds() <= median) {
             playlist.addSong(minHeap.remove());
         }
@@ -108,7 +91,8 @@ public class PlaylistBuilder {
 
 
     /**
-     * Returns Median duration in seconds
+     * Calculates the median of all songs.
+     *
      * @param lowerHalf
      * @param upperHalf
      */
@@ -127,10 +111,11 @@ public class PlaylistBuilder {
     }
 
     /**
-     * Read the text file to add bad words to an array.
-     * Save each music of the file in the heap
+     * Load all songs from the input list into two heap structures, one with songs that have duration less
+     * than the median and another song duration higher than the median.
+     *
      * @param inputReader
-     * @throws IOException
+     * @throws Exception
      */
     private void loadAlbumsFromFile(final BufferedReader inputReader) throws Exception {
         String line;
@@ -144,10 +129,11 @@ public class PlaylistBuilder {
             } else if (line.trim().isEmpty()) {
                 startNewAlbum = true;
             } else {
+                // Start consuming list of songs of the new album
                 Song nextSong = Song.parseFrom(line);
                 nextSong.setAlbum(newAlbum);
 
-                // Saves using Heap
+                // Add next song either to the lower half or upper half
                 if (minHeap.isEmpty()) {
                     minHeap.add(nextSong);
                 } else {
@@ -157,7 +143,8 @@ public class PlaylistBuilder {
                         maxHeap.add(nextSong);
                     }
                 }
-                // balance minHeap and maxHeap
+                // If tree sizes are unbalanced, move the smallest (or largest) element
+                // to the tree that has less elements
                 if (minHeap.size() > maxHeap.size() + 1) {
                     maxHeap.add(minHeap.remove());
                 } else if (maxHeap.size() > minHeap.size()) {

@@ -24,10 +24,6 @@ public class Playlist {
         return  "Total Time: " + DurationHelper.convertDurationFormat(totalDurationSeconds);
     }
 
-    /**
-     * This instance is equal to all instances of {@code ImmutablePlaylistInterface} that have equal attribute values.
-     * @return {@code true} if {@code this} is equal to {@code another} instance
-     */
     @Override
     public boolean equals(Object another) {
         if (this == another) return true;
@@ -40,10 +36,6 @@ public class Playlist {
                 && totalDurationSeconds == another.totalDurationSeconds;
     }
 
-    /**
-     * Computes a hash code from attributes: {@code songs}, {@code totalDurationSeconds}.
-     * @return hashCode value
-     */
     @Override
     public int hashCode() {
         int h = 5381;

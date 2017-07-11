@@ -4,6 +4,9 @@ import com.apple.playlistbuilder.Album;
 import com.apple.playlistbuilder.Playlist;
 import com.apple.playlistbuilder.Song;
 
+/**
+ * Utility class used to provide sample test data.
+ */
 public class PlaylistFixture {
 
     public static Playlist createFrom(String albumTitle, String... songs) throws Exception {
