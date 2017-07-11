@@ -13,20 +13,27 @@ public class Application {
     @Parameter(names = "--help", help = true)
     private boolean help = false;
 
-    public static void main(String[] args) throws Exception {
-        Application app = new Application();
-        JCommander commandArgs = JCommander.newBuilder()
-                .addObject(app)
-                .programName("Playlist Builder App")
-                .build();
-        commandArgs.parse(args);
+    public static void main(String[] args) {
+        try {
+            Application app = new Application();
+            JCommander commandArgs = JCommander.newBuilder()
+                    .addObject(app)
+                    .programName("Playlist Builder App")
+                    .build();
+            commandArgs.parse(args);
 
-        if (app.help) {
-            commandArgs.usage();
-            return;
+            if (app.help) {
+                commandArgs.usage();
+                return;
+            }
+
+            PlaylistBuilder builder = new PlaylistBuilder(app.inputFile);
+            Playlist playlist = builder.generatePlaylist();
+            builder.writePlaylistFile(playlist, app.outputFile);
+            System.out.println("Playlist created with success: " + app.outputFile);
+
+        } catch (Exception ex) {
+            System.out.println("Run error: " + ex.getMessage());
         }
-        PlaylistBuilder builder = new PlaylistBuilder(app.inputFile);
-        Playlist playlist = builder.generatePlaylist();
-        builder.writePlaylistFile(playlist, app.outputFile);
     }
 }
