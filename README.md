@@ -52,13 +52,7 @@ Total Time: [mm:ss]
 Make sure to have your Album file following the input criteria
 
 In order to generate the playlist you should execute the application 
-*playlist-builder* from your terminal. See format bellow:
+*playlist-builder* from your terminal. See command bellow:
 > **java -jar playlist-builder.jar -input [inputFilePath] -output [outputFilePath]**
 
-Example:<br>
-<code>
- java -jar playlist-builder.jar -input src/main/resources/Albums.txt -output src/main/resources/Playlist.txt</code>
-
-
-
-
+For more usage help, run with the flag *--help*

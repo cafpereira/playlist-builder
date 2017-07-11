@@ -1,4 +1,4 @@
-package com.apple.playlistbuilder;
+package com.apple.playlistbuilder.util;
 
 /**
  * Utility class to help with duration conversions

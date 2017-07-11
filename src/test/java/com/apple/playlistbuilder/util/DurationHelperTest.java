@@ -1,5 +1,6 @@
-package com.apple.playlistbuilder;
+package com.apple.playlistbuilder.util;
 
+import com.apple.playlistbuilder.util.DurationHelper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

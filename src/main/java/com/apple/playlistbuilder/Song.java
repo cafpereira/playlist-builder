@@ -1,12 +1,13 @@
 package com.apple.playlistbuilder;
 
 import com.apple.playlistbuilder.exceptions.SongFormatException;
+import com.apple.playlistbuilder.util.DurationHelper;
 
 import java.text.MessageFormat;
 
 public class Song implements Comparable<Song>{
     // Song output format: [artist] - [album] - [year] - [song] - [duration]
-    private final MessageFormat outputFormat = new MessageFormat("{0} - {1} - {2} - {3} - {4}");
+    private final MessageFormat outputFormat = new MessageFormat("{0} - {1} - {2,number,#} - {3} - {4}");
 
     private Album album;
     private String name;

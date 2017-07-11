@@ -1,5 +1,7 @@
 package com.apple.playlistbuilder;
 
+import com.apple.playlistbuilder.util.DurationHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 

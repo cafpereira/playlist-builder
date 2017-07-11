@@ -21,23 +21,12 @@ public class PlaylistBuilder {
     private PriorityQueue<Song> maxHeap =
             new PriorityQueue<Song>(DEFAULT_INITIAL_CAPACITY, Collections.reverseOrder());
 
-
     public PlaylistBuilder(final String inputFilePath) throws FileNotFoundException {
         this(new BufferedReader(new FileReader(inputFilePath)));
     }
 
     public PlaylistBuilder(final BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
-    }
-
-
-    public static void main(String[] args) throws Exception {
-        String fileName = "Albums.txt";
-        PlaylistBuilder builder = new PlaylistBuilder(fileName);
-        Playlist playlist = builder.generatePlaylist();
-
-        String outputFilename = "Playlist.txt";
-        builder.writePlaylistFile(playlist, outputFilename);
     }
 
     /**
@@ -74,7 +63,7 @@ public class PlaylistBuilder {
 
 
     /**
-     * Transfer from heap to playlist file
+     * Transfer playlist data to text file
      */
     public void writePlaylistFile(Playlist playlist, final String outputFilePath) {
         try {
