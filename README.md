@@ -55,4 +55,7 @@ In order to generate the playlist you should execute the application
 *playlist-builder* from your terminal. See command bellow:
 > **java -jar playlist-builder.jar -input [inputFilePath] -output [outputFilePath]**
 
-For more usage help, run with the flag *--help*
+If input or output names are not provided, the application will use the default values: 
+*Albums.txt* and *Playlist.txt*, respectively. 
+
+For more usage help, run the application using the flag *--help*
