@@ -79,8 +79,10 @@ public class PlaylistBuilder {
     public void writePlaylistFile(Playlist playlist, final String outputFilePath) {
         try {
             PrintWriter writer = new PrintWriter(outputFilePath, "UTF-8");
+            int songId = 1;
             for (Song song : playlist.getSongs()) {
-                writer.println(song.parseToOutputFormat());
+                writer.println(songId + ". " + song.parseToOutputFormat());
+                songId++;
             }
             writer.println(playlist.parseDurationToOutputFormat());
             writer.close();
