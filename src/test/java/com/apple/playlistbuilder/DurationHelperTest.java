@@ -1,6 +1,5 @@
 package com.apple.playlistbuilder;
 
-import com.apple.playlistbuilder.exceptions.OutOfBoundDurationException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -47,15 +46,10 @@ public class DurationHelperTest {
 
     @Test
     public void covertSeveralMinutes() throws Exception{
-        long seconds = 1259;
-        String expected = "20:59";
+        long seconds = 60 * 100 + 40;
+        String expected = "100:40";
         String actual = DurationHelper.convertDurationFormat(seconds);
 
         Assert.assertEquals(actual, expected, "ERROR Convert " + seconds + " Seconds: ");
-    }
-
-    @Test(expectedExceptions = OutOfBoundDurationException.class)
-    public void covertOutOfBoundMinutes() throws Exception{
-        DurationHelper.convertDurationFormat(6001);
     }
 }
