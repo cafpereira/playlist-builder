@@ -1,16 +1,14 @@
 package com.apple.playlistbuilder;
 
 import com.apple.playlistbuilder.fixtures.PlaylistFixture;
-import org.junit.Assert;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
 import java.io.BufferedReader;
-import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class PlaylistBuilderTest {
 
@@ -26,11 +24,8 @@ public class PlaylistBuilderTest {
     @Test
     public void emptyFile() throws Exception {
         when(mockReader.readLine()).thenReturn(null);
-
         Playlist emptyPlaylist =  new Playlist();
-
-        Assert.assertEquals("Playlist expected to be empty", emptyPlaylist,
-                playlistBuilder.generatePlaylist());
+        assertEquals(emptyPlaylist, playlistBuilder.generatePlaylist(), "Playlist expected to be empty");
     }
 
     @Test
@@ -44,7 +39,7 @@ public class PlaylistBuilderTest {
         Playlist expectedPlaylist = PlaylistFixture.createFrom("XTC / Drums and Wires / 1979",
                 "Making Plans for Nigel - 4:14");
 
-        Assert.assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
+        assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
     }
 
     @Test
@@ -62,7 +57,7 @@ public class PlaylistBuilderTest {
                 "Day In Day Out - 3:08",
                 "When You're Near Me I Have Difficulty - 3:22");
 
-        Assert.assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
+        assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
     }
 
     @Test
@@ -86,7 +81,7 @@ public class PlaylistBuilderTest {
         PlaylistFixture.addSong(expectedPlaylist, "Love / Forever Changes / 1967", "Alone Again Or - 3:17");
         PlaylistFixture.addSong(expectedPlaylist, "Vampire Weekend / Contra / 2010", "Horchata - 3:27");
 
-        Assert.assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
+        assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
     }
 
     @Test
@@ -111,6 +106,6 @@ public class PlaylistBuilderTest {
         PlaylistFixture.addSong(expectedPlaylist, "Vampire Weekend / Contra / 2010", "Horchata - 3:27");
         PlaylistFixture.addSong(expectedPlaylist, "Love / Forever Changes / 1967", "A House Is Not A Motel - 3:27");
 
-        Assert.assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
+        assertEquals(expectedPlaylist, playlistBuilder.generatePlaylist());
     }
 }
